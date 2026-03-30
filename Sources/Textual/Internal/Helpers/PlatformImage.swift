@@ -12,7 +12,14 @@ extension PlatformImage {
     bundle: Bundle?,
     environment: ColorEnvironmentValues
   ) -> PlatformImage? {
-    #if canImport(AppKit)
+    #if canImport(UIKit) && !os(watchOS)
+      PlatformImage(
+        named: name,
+        in: bundle,
+        compatibleWith: UITraitCollection(userInterfaceStyle: .init(environment.colorScheme))
+          .modifyingTraits { $0.accessibilityContrast = .init(environment.colorSchemeContrast) }
+      )
+    #elseif canImport(AppKit)
       guard let appearance = NSAppearance(environment: environment) else {
         return nil
       }
@@ -25,13 +32,6 @@ extension PlatformImage {
         }
       }
       return image
-    #elseif canImport(UIKit) && !os(watchOS)
-      PlatformImage(
-        named: name,
-        in: bundle,
-        compatibleWith: UITraitCollection(userInterfaceStyle: .init(environment.colorScheme))
-          .modifyingTraits { $0.accessibilityContrast = .init(environment.colorSchemeContrast) }
-      )
     #else
       PlatformImage(named: name, in: bundle, with: nil)
     #endif
@@ -48,7 +48,7 @@ extension SwiftUI.Image {
   }
 }
 
-#if canImport(AppKit)
+#if canImport(AppKit) && !targetEnvironment(macCatalyst)
   extension NSAppearance {
     convenience init?(environment: ColorEnvironmentValues) {
       switch (environment.colorScheme, environment.colorSchemeContrast) {

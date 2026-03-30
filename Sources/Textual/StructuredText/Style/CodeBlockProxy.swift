@@ -16,14 +16,7 @@ extension StructuredText {
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public func copyToPasteboard() {
-      #if TEXTUAL_ENABLE_TEXT_SELECTION && canImport(AppKit)
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-
-        let formatter = Formatter(AttributedString(content))
-        pasteboard.setString(formatter.plainText(), forType: .string)
-        pasteboard.setString(formatter.html(), forType: .html)
-      #elseif TEXTUAL_ENABLE_TEXT_SELECTION && canImport(UIKit)
+      #if TEXTUAL_ENABLE_TEXT_SELECTION && canImport(UIKit)
         let formatter = Formatter(AttributedString(content))
         UIPasteboard.general.setItems(
           [
@@ -33,6 +26,13 @@ extension StructuredText {
             ]
           ]
         )
+      #elseif TEXTUAL_ENABLE_TEXT_SELECTION && canImport(AppKit)
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+
+        let formatter = Formatter(AttributedString(content))
+        pasteboard.setString(formatter.plainText(), forType: .string)
+        pasteboard.setString(formatter.html(), forType: .html)
       #endif
     }
   }
